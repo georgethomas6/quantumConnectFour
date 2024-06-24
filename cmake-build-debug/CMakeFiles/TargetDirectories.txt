@@ -1,0 +1,3 @@
+/Users/georgethomas/Desktop/SummerResearch 2024/QuantumConnect4/cmake-build-debug/CMakeFiles/Connect_Four.dir
+/Users/georgethomas/Desktop/SummerResearch 2024/QuantumConnect4/cmake-build-debug/CMakeFiles/edit_cache.dir
+/Users/georgethomas/Desktop/SummerResearch 2024/QuantumConnect4/cmake-build-debug/CMakeFiles/rebuild_cache.dir
