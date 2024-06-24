@@ -3,7 +3,8 @@
 #include <iostream>
 
 
-GameLogic::GameLogic(int cols, int rows) {
+GameLogic::GameLogic(int cols, int rows)
+        : window(sf::VideoMode(720, 640), "Connect Four") {
     redTurn = true;
     yellowPosition = cols / 2;
     redPosition = cols / 2;
@@ -13,78 +14,38 @@ GameLogic::GameLogic(int cols, int rows) {
 }
 
 /**Returns red's position*/
-int GameLogic::getRedPos(){
+int GameLogic::getRedPos() {
     return redPosition;
 }
 
 /**Returns yellow's position*/
-int GameLogic::getYelPos(){
+int GameLogic::getYelPos() {
     return yellowPosition;
 }
 
-/**Returns true if it is red's turn, false if it is yellow's turn*/
-bool GameLogic::getRedTurn() {
-    return redTurn;
-}
 
 /**Returns the grid which is a vector containing vectors consisting of strings*/
 std::vector<std::vector<std::string>> GameLogic::getGrid() {
     return grid;
 }
 
-/**Sets the bool of redTurn to the opposite of its current value*/
-void GameLogic::changeTurn() {
-    redPosition = cols /2;
-    yellowPosition = cols/2;
-    redTurn = !redTurn;
-}
-
-/**Returns true on success of placement, false otherwise
- * @param position -> the column number at which the player is attempting to place their piece
- **/
-bool GameLogic::place(int position) {
-    //finds the row at which the first piece is stored in the column
-    int depth = 0;
-    for (int i = 0; i < rows; i++) {
-        if (grid[i][position] == "XXX") {
-            depth++;
-        } else {
-            break;
-        }
-    }
-
-    //could not place
-    if (depth == 0) {
-        return false;
-    } else {
-        //Decrement depth because it is 1 ahead of i at break statement
-        depth--;
-        //place piece
-        if (redTurn) {
-            grid[depth][position] = "red";
-        } else {
-            grid[depth][position] = "yel";
-        }
-        return true;
-    }
-}
 
 /**Returns Red if red won the game, Yel if yellow won the game, stalemate if neither won, and XXX if game is still in progress*/
 std::string GameLogic::winner() {
     int cnt = 0;
-    for (std::vector<std::string> row : grid){
-        for (std::string entry : row){
-            if (entry == "XXX"){
+    for (std::vector<std::string> row: grid) {
+        for (std::string entry: row) {
+            if (entry == "XXX") {
                 cnt++;
             }
         }
     }
 
-    if (cnt == 0){
+    if (cnt == 0) {
         return "stalemate";
-    } else if (redTurn && (checkCols() || checkRows() || checkDiagonals())){
+    } else if (redTurn && (checkCols() || checkRows() || checkDiagonals())) {
         return "Yel";
-    } else if (!redTurn && (checkCols()  || checkRows() || checkDiagonals())){
+    } else if (!redTurn && (checkCols() || checkRows() || checkDiagonals())) {
         return "Red";
     }
 
@@ -96,7 +57,8 @@ bool GameLogic::checkRows() {
     for (std::vector<std::string> row: grid) {
         //check every four positions in the row for four of a kind
         for (int i = 0; i < row.size() - 3; i++) {
-            bool fourInARow = row[i] == row[i + 1] && row[i + 1] == row[i + 2] && row[i + 2] == row[i + 3] && row[i] != "XXX";
+            bool fourInARow =
+                    row[i] == row[i + 1] && row[i + 1] == row[i + 2] && row[i + 2] == row[i + 3] && row[i] != "XXX";
             if (fourInARow) {
                 return true;
             }
@@ -146,34 +108,109 @@ bool GameLogic::checkDiagonals() {
     return false;
 }
 
-/**Moves the piece left or right during the selection phase of a player's turn
- * @param event -> the keyStroke the player input
- **/
-void GameLogic::move(sf::Keyboard::Key event) {
-    if (redTurn) {
-        if (event == sf::Keyboard::Left) {
-            redPosition--;
-            if (redPosition < 0) {
-                redPosition = cols - 1;
-            }
-        } else if (event == sf::Keyboard::Right) {
-            redPosition++;
-            if (redPosition > cols - 1) {
-                redPosition = 0;
-            }
+
+/**Attempts to place the input string in the input col on the grid
+ * --if it can be placed it returns the depth
+ * --if not it returns -1
+ * @param pos -> column at which player is trying to place piece
+ * */
+int GameLogic::tryPlace(int pos) {
+    int depth = 0;
+    for (int i = 0; i < rows; i++) {
+        bool empty = grid[i][pos] == "XXX";
+        if (empty) {
+            depth++;
+        } else {
+            break;
         }
-    } else {
-        if (event == sf::Keyboard::Left) {
-            yellowPosition--;
-            if (yellowPosition < 0) {
-                yellowPosition = cols - 1;
+    }
+    depth--;
+
+    return depth;
+}
+
+/**Returns true and switches turn if move succeeded; false and does not switch turn otherwise
+ * @param positionOne -> column of first possibility
+ * @param positionTwo -> column of second possibility*/
+bool GameLogic::quantumMove(int positionOne, int positionTwo) {
+    //Check for valid placements
+    bool firstPlacementGood = tryPlace(positionOne) != -1;
+    bool secondPlacementGood = tryPlace(positionTwo) != -1;
+
+    //if good placements add move
+    if (firstPlacementGood && secondPlacementGood) {
+        std::vector<int> move;
+        move.push_back(positionOne);
+        move.push_back(positionTwo);
+        moves.push_back(move);
+        updateBoard();
+        return true;
+    }
+
+    return false;
+}
+
+void GameLogic::measure() {
+    //TO DO
+}
+
+/**Updates the board with current moves list, handles turn switching*/
+void GameLogic::updateBoard() {
+    grid = std::vector<std::vector<std::string>>(rows, std::vector<std::string>(cols, "XXX"));
+    //turn will be modded by 2 to determine if red or yellow turn
+    int turn = 0;
+    for (std::vector<int> move: moves) {
+        //if move.size is less than three then it is a classical move so put RRR or YYY
+        if (move.size() == 1) {
+            if (turn % 2 == 0) {
+                grid[tryPlace(move[0])][move[0]] = "RRR";
+                turn++;
+            } else {
+                grid[tryPlace(move[0])][move[0]] = "YYY";
+                turn++;
             }
-        } else if (event == sf::Keyboard::Right) {
-            yellowPosition++;
-            if (yellowPosition > cols - 1) {
-                yellowPosition = 0;
+        } else {
+            //NOTE THIS IS HARDCODED IF WANT MORE POSSIBILITIES FOR QUANTUM MOVES WILL HAVE TO GET MORE COMPLICATED
+            if (turn % 2 == 0) {
+                grid[tryPlace(move[0])][move[0]] = "RXR";
+                grid[tryPlace(move[1])][move[1]] = "RXR";
+                turn++;
+            } else if (turn % 2 == 1) {
+                grid[tryPlace(move[0])][move[0]] = "YXY";
+                grid[tryPlace(move[1])][move[1]] = "YXY";
+                turn++;
             }
         }
     }
 }
 
+/**Prints the board on the terminal*/
+void GameLogic::printBoard() {
+    for (const std::vector<std::string> &row: grid) {
+        for (const std::string &entry: row) {
+            if (entry.size() < 2) {
+                std::cout << entry << " ";
+            } else {
+                std::cout << entry << " ";
+            }
+        }
+        std::cout << "\n";
+    }
+}
+
+/**Returns true if the move succeed and switches turn, false otherwise and does not switch turn
+ * @param position -> column for the classical move to occur in*/
+bool GameLogic::classicalMove(int position) {
+    bool goodPlacement = tryPlace(position);
+    if (goodPlacement) {
+        //create move to add to moves list
+        std::vector<int> move;
+        //update moves
+        move.push_back(position);
+        moves.push_back(move);
+        //update board
+        updateBoard();
+        return true;
+    }
+    return false;
+}

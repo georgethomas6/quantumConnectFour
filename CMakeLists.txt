@@ -13,8 +13,6 @@ add_executable(Connect_Four
         main.cpp
         connectFourGraphics.cpp
         Headers/connectFourGraphics.h
-        Game.cpp
         Headers/Game.h
-        test.cpp
 )
 target_link_libraries(Connect_Four sfml-system sfml-window sfml-graphics sfml-audio sfml-network)

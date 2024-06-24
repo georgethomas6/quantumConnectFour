@@ -11,6 +11,8 @@ private:
     int redPosition;
     int cols;
     int rows;
+    std::vector<std::vector<int>> moves;
+    sf::RenderWindow window;
     std::vector<std::vector<std::string>> grid;
 
 
@@ -20,14 +22,19 @@ public:
     int getRedPos();
     int getYelPos();
     void changeTurn();
+    void updateBoard();
     bool getRedTurn();
-    bool place(int position);
     bool checkCols();
     bool checkRows();
     bool checkDiagonals();
-    void move(sf::Keyboard::Key event);
+    int tryPlace(int pos);
+    bool classicalMove(int position);
+    bool quantumMove(int positionOne, int positionTwo);
+    void select();
     std::string winner();
+    void measure();
     std::vector<std::vector<std::string>> getGrid();
+    void printBoard();
 };
 
 
