@@ -1,6 +1,8 @@
 #include "Headers/GameLogic.h"
 #include <SFML/Graphics.hpp>
 #include <iostream>
+#include <random>
+#include <functional>
 
 
 GameLogic::GameLogic(int cols, int rows)
@@ -10,6 +12,7 @@ GameLogic::GameLogic(int cols, int rows)
     redPosition = cols / 2;
     this->cols = cols;
     this->rows = rows;
+    std::vector<std::vector<int>> moves;
     grid = std::vector<std::vector<std::string>>(rows, std::vector<std::string>(cols, "XXX"));
 }
 
@@ -150,8 +153,28 @@ bool GameLogic::quantumMove(int positionOne, int positionTwo) {
     return false;
 }
 
+/**This function chooses a state for the quantum moves made*/
 void GameLogic::measure() {
-    //TO DO
+    //have to specify pass by value or the changes won't hold
+    for (std::vector<int> &move : moves){
+        std::random_device r;
+
+        // Choose a random mean between 1 and 6
+        std::default_random_engine e1(r());
+        std::uniform_int_distribution<int> uniform_dist(1, 6);
+        int choice = uniform_dist(e1) % 2;
+        if (move.size() != 1){
+            if (choice == 1){
+                //if chose the first number delete the second number
+            move.pop_back();
+            } else {
+                //change first element to the value of the second element before deleting the second element
+                move[0] = move[1];
+                move.pop_back();
+            }
+        }
+    }
+    updateBoard();
 }
 
 /**Updates the board with current moves list, handles turn switching*/
