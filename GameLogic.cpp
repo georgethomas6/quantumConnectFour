@@ -1,12 +1,10 @@
 #include "Headers/GameLogic.h"
-#include <SFML/Graphics.hpp>
 #include <iostream>
 #include <random>
 #include <functional>
 
 
-GameLogic::GameLogic(int cols, int rows)
-        : window(sf::VideoMode(720, 640), "Connect Four") {
+GameLogic::GameLogic(int cols, int rows) {
     redTurn = true;
     yellowPosition = cols / 2;
     redPosition = cols / 2;
@@ -26,6 +24,13 @@ int GameLogic::getYelPos() {
     return yellowPosition;
 }
 
+bool GameLogic::getRedTurn() {
+    return redTurn;
+}
+
+void GameLogic::changeTurn() {
+    redTurn = !redTurn;
+}
 
 /**Returns the grid which is a vector containing vectors consisting of strings*/
 std::vector<std::vector<std::string>> GameLogic::getGrid() {
@@ -147,6 +152,7 @@ bool GameLogic::quantumMove(int positionOne, int positionTwo) {
         move.push_back(positionTwo);
         moves.push_back(move);
         updateBoard();
+        changeTurn();
         return true;
     }
 
@@ -195,12 +201,12 @@ void GameLogic::updateBoard() {
         } else {
             //NOTE THIS IS HARDCODED IF WANT MORE POSSIBILITIES FOR QUANTUM MOVES WILL HAVE TO GET MORE COMPLICATED
             if (turn % 2 == 0) {
-                grid[tryPlace(move[0])][move[0]] = "RXR";
-                grid[tryPlace(move[1])][move[1]] = "RXR";
+                grid[tryPlace(move[0])][move[0]] = "RXX";
+                grid[tryPlace(move[1])][move[1]] = "RXX";
                 turn++;
             } else if (turn % 2 == 1) {
-                grid[tryPlace(move[0])][move[0]] = "YXY";
-                grid[tryPlace(move[1])][move[1]] = "YXY";
+                grid[tryPlace(move[0])][move[0]] = "YXX";
+                grid[tryPlace(move[1])][move[1]] = "YXX";
                 turn++;
             }
         }
@@ -233,7 +239,12 @@ bool GameLogic::classicalMove(int position) {
         moves.push_back(move);
         //update board
         updateBoard();
+        changeTurn();
         return true;
     }
     return false;
 }
+
+
+
+

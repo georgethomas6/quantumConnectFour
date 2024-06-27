@@ -1,6 +1,6 @@
 #pragma once
 #include <SFML/Graphics.hpp>
-#include "connectFourGraphics.h"
+#include "cFourGraphics.h"
 #include "GameLogic.h"
 
 class Game {
@@ -11,8 +11,8 @@ class Game {
 
 public:
     Game(int cols, int rows);
-    void play(sf::RenderWindow *window, connectFourGraphics *graphics, GameLogic *game);
-    std::string round(sf::RenderWindow *window, connectFourGraphics *graphics, GameLogic *game);
+    void play(sf::RenderWindow *window, cFourGraphics *graphics, GameLogic *game);
+    std::string round(sf::RenderWindow *window, cFourGraphics *graphics, GameLogic *game);
 
 
 };

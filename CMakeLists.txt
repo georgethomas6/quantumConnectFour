@@ -11,8 +11,8 @@ add_executable(Connect_Four
         GameLogic.cpp
         Headers/GameLogic.h
         main.cpp
-        connectFourGraphics.cpp
-        Headers/connectFourGraphics.h
+        cFourGraphics.cpp
+        Headers/cFourGraphics.h
         Headers/Game.h
 )
 target_link_libraries(Connect_Four sfml-system sfml-window sfml-graphics sfml-audio sfml-network)

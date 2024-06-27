@@ -12,7 +12,6 @@ private:
     int cols;
     int rows;
     std::vector<std::vector<int>> moves;
-    sf::RenderWindow window;
     std::vector<std::vector<std::string>> grid;
 
 
@@ -30,7 +29,6 @@ public:
     int tryPlace(int pos);
     bool classicalMove(int position);
     bool quantumMove(int positionOne, int positionTwo);
-    void select();
     std::string winner();
     void measure();
     std::vector<std::vector<std::string>> getGrid();
