@@ -1,6 +1,7 @@
 #pragma once
 
 #include <SFML/Graphics.hpp>
+#include "GameLogic.h"
 
 class cFourGraphics {
 
@@ -8,6 +9,7 @@ class cFourGraphics {
     int yCells;
     int xSpace;
     int ySpace;
+    GameLogic logic;
     int horizontalSpace;
     int verticalSpace;
     int radius;
@@ -15,9 +17,11 @@ class cFourGraphics {
 public:
     cFourGraphics(int xCells, int yCells, int xSpace, int ySpace);
     void drawGrid();
-    void drawPieces(std::vector<std::vector<std::string>> grid);
-    void drawClassicTurnInProgress(int position, bool redTurn);
-    void drawQuantumTurnInProgress(int positionOne, bool redTurn);
-    void wait();
+    void drawPieces();
+    void drawClassicTurnInProgress();
+    void drawQuantumTurnInProgress();
+    void handleKeyPress(sf::Event event);
+    GameLogic getLogic();
+    void play();
 };
 

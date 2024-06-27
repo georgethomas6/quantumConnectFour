@@ -9,12 +9,14 @@
  * @param ySpace -> total vertical space of the window
  **/
 cFourGraphics::cFourGraphics(int xCells, int yCells, int xSpace, int ySpace)
-    : window(sf::VideoMode(xSpace, ySpace), "C4")
+    : window(sf::VideoMode(xSpace, ySpace), "C4"),
+    logic(xCells, yCells)
     {
     this->xCells = xCells + 2;
     this->yCells = yCells + 3;
     this->xSpace = xSpace;
     this->ySpace = ySpace;
+
     verticalSpace = ySpace / this->yCells;
     horizontalSpace = xSpace / this->xCells;
     if (verticalSpace > horizontalSpace) {
@@ -52,39 +54,47 @@ void cFourGraphics::drawGrid() {
  * @param position -> the column in which the circle will be drawn above
  * @param redTurn -> a bool based on if it is red's turn or not, determines color of the circle
  **/
-void cFourGraphics::drawClassicTurnInProgress(int position, bool redTurn) {
+void cFourGraphics::drawClassicTurnInProgress() {
 
     sf::CircleShape circle(radius);
 
-    if (redTurn){
+    if (logic.getRedTurn()){
         circle.setFillColor(sf::Color::Red);
+        circle.setPosition(horizontalSpace * (logic.getRedPos() + 1)  + (horizontalSpace - radius) / 3, verticalSpace + (verticalSpace - radius) / 3 );
     } else {
         circle.setFillColor(sf::Color::Yellow);
+        circle.setPosition(horizontalSpace * (logic.getYelPos() + 1)  + (horizontalSpace - radius) / 3, verticalSpace + (verticalSpace - radius) / 3 );
     }
-    circle.setPosition(horizontalSpace * (position + 1)  + (horizontalSpace - radius) / 3, verticalSpace + (verticalSpace - radius) / 3 );
+
     window.draw(circle);
+    window.display();
 }
 
-void cFourGraphics::drawQuantumTurnInProgress(int position, bool redTurn) {
+void cFourGraphics::drawQuantumTurnInProgress() {
     sf::RectangleShape cover;
     cover.setSize(sf::Vector2f (  1.2 * radius, 2 * radius));
     cover.setFillColor(sf::Color (211, 211, 211));
-    drawClassicTurnInProgress(position, redTurn);
-    cover.setPosition( horizontalSpace * (position + 1)  + 2 * (horizontalSpace - radius) / 3,verticalSpace + (verticalSpace - radius) / 3);
+    drawClassicTurnInProgress();
+    if (logic.getRedTurn()) {
+        cover.setPosition(horizontalSpace * (logic.getRedPos() + 1) + 2 * (horizontalSpace - radius) / 3,
+                          verticalSpace + (verticalSpace - radius) / 3);
+    } else {
+        cover.setPosition(horizontalSpace * (logic.getYelPos() + 1) + 2 * (horizontalSpace - radius) / 3,
+                          verticalSpace + (verticalSpace - radius) / 3);
+    }
     window.draw(cover);
+    window.display();
 }
 
 /**Draws the pieces placed in the grid
  * @param grid -> a vector containing a vector of strings that serves as the logical grid
  **/
-void cFourGraphics::drawPieces(std::vector<std::vector<std::string>> grid) {
-
-
+void cFourGraphics::drawPieces() {
+    std::vector<std::vector<std::string>> grid = logic.getGrid();
     sf::CircleShape circle(radius);
     sf::RectangleShape cover;
     cover.setSize(sf::Vector2f (  1.2 * radius, 2 * radius));
     cover.setFillColor(sf::Color (211, 211, 211));
-
 
     for (int y = 0; y < grid.size(); y++) {
         for (int x = 0; x < grid[y].size(); x++) {
@@ -107,15 +117,37 @@ void cFourGraphics::drawPieces(std::vector<std::vector<std::string>> grid) {
                 circle.setPosition(horizontalSpace * (x + 1)  + (horizontalSpace - radius) / 3 , verticalSpace * (y + 2) + (verticalSpace - radius) / 3 );
                 window.draw(circle);
                 window.draw(cover);
-
             }
         }
     }
 }
 
-void cFourGraphics::wait(){
+void cFourGraphics::handleKeyPress(sf::Event event) {
+    if (event.type == sf::Event::EventType::KeyPressed) {
+        if (logic.getRedTurn()) {
+            if (event.key.code == sf::Keyboard::Key::Right) {
+                logic.moveRed(1);
+            } else if (event.key.code == sf::Keyboard::Key::Left) {
+                logic.moveRed(-1);
+            } else if (event.key.code == sf::Keyboard::Key::Space) {
+                logic.classicalMove(logic.getRedPos());
+            }
+        } else {
+            if (event.key.code == sf::Keyboard::Key::Right) {
+                logic.moveYellow(1);
+            } else if (event.key.code == sf::Keyboard::Key::Left) {
+                logic.moveYellow(-1);
+            } else if (event.key.code == sf::Keyboard::Key::Space) {
+                logic.classicalMove(logic.getYelPos());
+            }
+        }
+    }
+}
+void cFourGraphics::play(){
     sf::Event event;
-    window.display();
+    drawGrid();
+    drawPieces();
+    drawClassicTurnInProgress();
     while (window.isOpen()){
 
 
@@ -124,8 +156,19 @@ void cFourGraphics::wait(){
        if (event.key.code == sf::Keyboard::Key::Escape){
            window.close();
        }
+       handleKeyPress(event);
+       drawGrid();
+       drawPieces();
+       drawClassicTurnInProgress();
+       logic.printBoard();
+       std::cout<< "\n";
+
     }
     }
+}
+
+GameLogic cFourGraphics::getLogic() {
+    return logic;
 }
 
 

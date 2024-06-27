@@ -18,6 +18,8 @@ private:
 public:
 
     GameLogic(int cols, int rows);
+    void moveYellow(int dx);
+    void moveRed(int dx);
     int getRedPos();
     int getYelPos();
     void changeTurn();

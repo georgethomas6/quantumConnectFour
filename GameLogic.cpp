@@ -24,6 +24,24 @@ int GameLogic::getYelPos() {
     return yellowPosition;
 }
 
+void GameLogic::moveRed(int dx){
+    redPosition = redPosition + dx;
+    if (redPosition > cols - 1){
+        redPosition = 0;
+    } else if (redPosition < 0){
+        redPosition = cols - 1;
+    }
+}
+
+void GameLogic::moveYellow(int dx){
+    yellowPosition = yellowPosition + dx;
+    if (yellowPosition > cols - 1){
+        yellowPosition = 0;
+    } else if (yellowPosition < 0){
+        yellowPosition = cols - 1;
+    }
+}
+
 bool GameLogic::getRedTurn() {
     return redTurn;
 }
@@ -230,7 +248,7 @@ void GameLogic::printBoard() {
 /**Returns true if the move succeed and switches turn, false otherwise and does not switch turn
  * @param position -> column for the classical move to occur in*/
 bool GameLogic::classicalMove(int position) {
-    bool goodPlacement = tryPlace(position);
+    bool goodPlacement = tryPlace(position) != -1;
     if (goodPlacement) {
         //create move to add to moves list
         std::vector<int> move;
