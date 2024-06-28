@@ -49,13 +49,6 @@ cmake_ninja_workdir = /Users/georgethomas/Desktop/SummerResearch$ 2024/QuantumCo
 
 build cmake_object_order_depends_target_Connect_Four: phony || CMakeFiles/Connect_Four.dir
 
-build CMakeFiles/Connect_Four.dir/GameLogic.cpp.o: CXX_COMPILER__Connect_Four_unscanned_Debug /Users/georgethomas/Desktop/SummerResearch$ 2024/QuantumConnect4/GameLogic.cpp || cmake_object_order_depends_target_Connect_Four
-  DEP_FILE = CMakeFiles/Connect_Four.dir/GameLogic.cpp.o.d
-  FLAGS = -g -std=gnu++17 -arch arm64 -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX14.4.sdk -fcolor-diagnostics
-  INCLUDES = -I/usr/local/include -isystem /opt/homebrew/include
-  OBJECT_DIR = CMakeFiles/Connect_Four.dir
-  OBJECT_FILE_DIR = CMakeFiles/Connect_Four.dir
-
 build CMakeFiles/Connect_Four.dir/main.cpp.o: CXX_COMPILER__Connect_Four_unscanned_Debug /Users/georgethomas/Desktop/SummerResearch$ 2024/QuantumConnect4/main.cpp || cmake_object_order_depends_target_Connect_Four
   DEP_FILE = CMakeFiles/Connect_Four.dir/main.cpp.o.d
   FLAGS = -g -std=gnu++17 -arch arm64 -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX14.4.sdk -fcolor-diagnostics
@@ -70,6 +63,13 @@ build CMakeFiles/Connect_Four.dir/cFourGraphics.cpp.o: CXX_COMPILER__Connect_Fou
   OBJECT_DIR = CMakeFiles/Connect_Four.dir
   OBJECT_FILE_DIR = CMakeFiles/Connect_Four.dir
 
+build CMakeFiles/Connect_Four.dir/Logic.cpp.o: CXX_COMPILER__Connect_Four_unscanned_Debug /Users/georgethomas/Desktop/SummerResearch$ 2024/QuantumConnect4/Logic.cpp || cmake_object_order_depends_target_Connect_Four
+  DEP_FILE = CMakeFiles/Connect_Four.dir/Logic.cpp.o.d
+  FLAGS = -g -std=gnu++17 -arch arm64 -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX14.4.sdk -fcolor-diagnostics
+  INCLUDES = -I/usr/local/include -isystem /opt/homebrew/include
+  OBJECT_DIR = CMakeFiles/Connect_Four.dir
+  OBJECT_FILE_DIR = CMakeFiles/Connect_Four.dir
+
 
 # =============================================================================
 # Link build statements for EXECUTABLE target Connect_Four
@@ -78,7 +78,7 @@ build CMakeFiles/Connect_Four.dir/cFourGraphics.cpp.o: CXX_COMPILER__Connect_Fou
 #############################################
 # Link the executable Connect_Four
 
-build Connect_Four: CXX_EXECUTABLE_LINKER__Connect_Four_Debug CMakeFiles/Connect_Four.dir/GameLogic.cpp.o CMakeFiles/Connect_Four.dir/main.cpp.o CMakeFiles/Connect_Four.dir/cFourGraphics.cpp.o | /opt/homebrew/lib/libsfml-graphics.2.6.1.dylib /opt/homebrew/lib/libsfml-audio.2.6.1.dylib /opt/homebrew/lib/libsfml-network.2.6.1.dylib /opt/homebrew/lib/libsfml-window.2.6.1.dylib /opt/homebrew/lib/libsfml-system.2.6.1.dylib
+build Connect_Four: CXX_EXECUTABLE_LINKER__Connect_Four_Debug CMakeFiles/Connect_Four.dir/main.cpp.o CMakeFiles/Connect_Four.dir/cFourGraphics.cpp.o CMakeFiles/Connect_Four.dir/Logic.cpp.o | /opt/homebrew/lib/libsfml-graphics.2.6.1.dylib /opt/homebrew/lib/libsfml-audio.2.6.1.dylib /opt/homebrew/lib/libsfml-network.2.6.1.dylib /opt/homebrew/lib/libsfml-window.2.6.1.dylib /opt/homebrew/lib/libsfml-system.2.6.1.dylib
   FLAGS = -g -arch arm64 -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX14.4.sdk
   LINK_LIBRARIES = -Wl,-rpath,/opt/homebrew/lib  /opt/homebrew/lib/libsfml-graphics.2.6.1.dylib  /opt/homebrew/lib/libsfml-audio.2.6.1.dylib  /opt/homebrew/lib/libsfml-network.2.6.1.dylib  /opt/homebrew/lib/libsfml-window.2.6.1.dylib  /opt/homebrew/lib/libsfml-system.2.6.1.dylib
   OBJECT_DIR = CMakeFiles/Connect_Four.dir

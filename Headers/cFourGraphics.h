@@ -1,7 +1,7 @@
 #pragma once
 
 #include <SFML/Graphics.hpp>
-#include "GameLogic.h"
+#include "Logic.h"
 
 class cFourGraphics {
 
@@ -9,7 +9,7 @@ class cFourGraphics {
     int yCells;
     int xSpace;
     int ySpace;
-    GameLogic logic;
+    Logic logic;
     int horizontalSpace;
     int verticalSpace;
     int radius;
@@ -20,8 +20,10 @@ public:
     void drawPieces();
     void drawClassicTurnInProgress();
     void drawQuantumTurnInProgress();
-    void handleKeyPress(sf::Event event);
-    GameLogic getLogic();
+    void drawHalfQuantumMove();
+    sf::Keyboard::Key handleKeyPress(sf::Event event);
+    void handleQuantumMove(sf::Event event);
+    Logic getLogic();
     void play();
 };
 

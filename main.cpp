@@ -1,17 +1,27 @@
 #include <iostream>
-#include "Headers/GameLogic.h"
+#include "Headers/Logic.h"
 #include "Headers/cFourGraphics.h"
 
 
 int main(){
 
     cFourGraphics graphics(7, 6, 720, 640);
-    GameLogic logic(7, 6);
-    graphics.getLogic().quantumMove(2,3);
+    Logic logic(7, 6);
+    for (int i = 0; i < 4; i++){
+        logic.classicalMove(3);
+        logic.classicalMove(4);
+    }
 
-    graphics.getLogic().printBoard();
-    graphics.drawClassicTurnInProgress();
-    graphics.play();
+    logic.updateBoard();
+    logic.printBoard();
+    logic.measure();
+
+
+    logic.updateBoard();
+
+    std::cout << logic.winner() << " \n";
+    logic.printBoard();
+
 
 
 
