@@ -8,7 +8,7 @@ Logic::Logic(int columns, int rows) {
     redTurn = true;
     cMoveInProgress = true;
     quantumMovesPlayed = 0;
-    this->grid = std::vector<std::vector<std::string>>(rows, std::vector<std::string>(columns, "XXX"));
+    this->grid = std::vector<std::vector<std::string>>(rows + 2, std::vector<std::string>(columns, "XXX"));
     std::vector<std::vector<std::string>> turns;
     std::vector<std::string> moves;
 }
@@ -150,7 +150,7 @@ bool Logic::checkDiagonals() {
  * */
 int Logic::tryPlace(int pos) {
     int depth = 0;
-    for (int i = 0; i < rows; i++) {
+    for (int i = 0; i < rows + 2; i++) {
         bool empty = grid[i][pos] == "XXX";
         if (empty) {
             depth++;
@@ -172,7 +172,7 @@ void Logic::changeCMoveInProgress() {
  * @param position -> column piece is to be placed in*/
 void Logic::classicalMove(int column) {
     int depth = tryPlace(column);
-    bool columnNotFull = depth != -1;
+    bool columnNotFull = depth > 1;
     if (columnNotFull) {
         std::vector<int> move;
         move.push_back(column);
@@ -184,7 +184,7 @@ void Logic::classicalMove(int column) {
  * @param position -> column piece is to be placed in*/
 void Logic::halfQuantumMove(int column) {
     int depth = tryPlace(column);
-    bool columnNotFull = depth != -1;
+    bool columnNotFull = depth > -1;
     if (columnNotFull) {
         quantumMoves.push_back(column);
         quantumMovesPlayed++;
@@ -209,13 +209,14 @@ void Logic::quantumMoveToTurns() {
 /**Calls quantumMoveToTurns, then loops through Turns making the corresponding changes to grid for each turn played
  * one turn is when one color plays a move*/
 void Logic::updateBoard() {
-    grid = std::vector<std::vector<std::string>>(rows, std::vector<std::string>(columns, "XXX"));
+    //clear the board
+    grid = std::vector<std::vector<std::string>>(rows + 2, std::vector<std::string>(columns, "XXX"));
     //turn will be modded by 2 to determine if red or yellow turn
     int turnCounter = 0;
     for (std::vector<int> &turn: turns) {
         //if turn.size = 1 then it is a classical move, so only one placement on the board
         if (turn.size() == 1) {
-            if (tryPlace(turn[0]) != -1) {
+            if (tryPlace(turn[0]) > 1) {
                 if (turnCounter % 2 == 0) {
                     grid[tryPlace(turn[0])][turn[0]] = "RRR";
                     turnCounter++;
@@ -226,8 +227,8 @@ void Logic::updateBoard() {
             }
         } else {
             //we need to play two moves because a quantum move consists of two placements on the board
-            bool columnNotFull1 = tryPlace(turn[0]) != -1;
-            bool columnNotFull2 = tryPlace(turn[0] != -1);
+            bool columnNotFull1 = tryPlace(turn[0]) > -1;
+            bool columnNotFull2 = tryPlace(turn[0] > -1);
             bool notFull = columnNotFull1 && columnNotFull2;
             if (turnCounter % 2 == 0 && notFull) {
                 grid[tryPlace(turn[0])][turn[0]] = "RXX";
@@ -281,7 +282,17 @@ void Logic::measure() {
     updateBoard();
 }
 
+void Logic::printMoves(){
+    for (int i = 0; i < turns.size(); i++){
+        for (int move : turns[i]){
+            std::cout << move << " ";
+        }
+        std::cout << "\n";
+    }
+
+}
 void Logic::printBoard() {
+
     for (int y = 0; y < grid.size(); y++) {
         for (int x = 0; x < grid[y].size(); x++) {
 

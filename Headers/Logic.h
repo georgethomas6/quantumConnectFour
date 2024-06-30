@@ -41,6 +41,7 @@ public:
     void measure();
     void printBoard();
 
+    void printMoves();
 };
 
 
