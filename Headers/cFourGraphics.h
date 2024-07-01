@@ -5,6 +5,7 @@
 
 class cFourGraphics {
 
+private:
     int xCells;
     int yCells;
     int xSpace;
@@ -14,13 +15,20 @@ class cFourGraphics {
     int verticalSpace;
     int radius;
     sf::RenderWindow window;
+
 public:
     cFourGraphics(int xCells, int yCells, int xSpace, int ySpace);
+
     void drawGrid();
+
     void drawPieces();
+
     void drawClassicTurnInProgress();
+
     void drawQuantumTurnInProgress();
+
     void handleKeyPress(sf::Event event);
+
     void play();
 };
 

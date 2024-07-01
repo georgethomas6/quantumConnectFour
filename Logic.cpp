@@ -28,6 +28,7 @@ int Logic::getYellowPosition() {
  * @param dx -> value to increment/decrement red's position*/
 void Logic::moveRed(int dx) {
     redPosition = redPosition + dx;
+    //makes the piece warp around the grid
     if (redPosition > columns - 1) {
         redPosition = 0;
     } else if (redPosition < 0) {
@@ -39,6 +40,7 @@ void Logic::moveRed(int dx) {
  * @param dx -> value to increment/decrement yellow's position*/
 void Logic::moveYellow(int dx) {
     yellowPosition = yellowPosition + dx;
+    //makes the piece warp around the grid
     if (yellowPosition > columns - 1) {
         yellowPosition = 0;
     } else if (yellowPosition < 0) {
@@ -51,10 +53,12 @@ bool Logic::getRedTurn() {
     return redTurn;
 }
 
+/**@return quantumMovesPlayed*/
 int Logic::getQuantumMovesPlayed() {
     return quantumMovesPlayed;
 }
 
+/**@return turnsPlayed*/
 int Logic::getTurnsPlayed() {
     return turnsPlayed;
 }
@@ -74,7 +78,7 @@ bool Logic::getCMoveInProgress() {
     return cMoveInProgress;
 }
 
-/**@return Red if red won the game, Yel if yellow won the game, stalemate if neither won, and XXX if game is still in progress*/
+/**@return return true if the game is over, false otherwise*/
 bool Logic::winner() {
     int cnt = 0;
     for (std::vector<std::string> row: grid) {
@@ -84,7 +88,6 @@ bool Logic::winner() {
             }
         }
     }
-
     return cnt == 0 || checkCols() || checkRows() || checkDiagonals();
 }
 
@@ -121,7 +124,6 @@ bool Logic::checkCols() {
             }
         }
     }
-
     return false;
 }
 
@@ -140,25 +142,25 @@ bool Logic::checkDiagonals() {
                 return true;
             }
         }
-   }
+    }
 
     //check descending diagonals
-    for (int y = grid.size() - 1; y > 3; y--){
-        for (int x = grid[y].size() - 1; x > 2; x--){
+    for (int y = grid.size() - 1; y > 3; y--) {
+        for (int x = grid[y].size() - 1; x > 2; x--) {
             bool fourInARow =
                     grid[y][x] == grid[y - 1][x - 1] &&
                     grid[y][x] == grid[y - 2][x - 2] &&
                     grid[y][x] == grid[y - 3][x - 3] && (
-                    grid[y][x] == "RRR" || grid[y][x] == "YYY");
-            if (fourInARow){
+                            grid[y][x] == "RRR" || grid[y][x] == "YYY");
+            if (fourInARow) {
                 return true;
             }
         }
     }
-
     return false;
 }
 
+/**Resets the positions of both pieces to columns / 2 i.e. the center*/
 void Logic::resetPositions() {
     redPosition = columns / 2;
     yellowPosition = columns / 2;
@@ -179,7 +181,6 @@ int Logic::tryPlace(int pos) {
         }
     }
     depth--;
-
     return depth;
 }
 
@@ -189,11 +190,14 @@ void Logic::changeCMoveInProgress() {
 }
 
 /**Makes a classical move in the column corresponding to the parameter
- * @param position -> column piece is to be placed in*/
+ * @param position -> column piece is to be placed in
+ * @return true if move succeeded, false otherwise*/
 bool Logic::classicalMove(int column) {
     int depth = tryPlace(column);
+    //depth greater than 1 because there are two phantom rows for quantum pieces to appear above board prior to measurement
     bool columnNotFull = depth > 1;
     if (columnNotFull) {
+        //add move to turns if it was allowed
         std::vector<int> move;
         move.push_back(column);
         turns.push_back(move);
@@ -204,13 +208,17 @@ bool Logic::classicalMove(int column) {
 }
 
 /**Makes half of a quantum move in the column corresponding to the parameter
- * @param position -> column piece is to be placed in*/
+ * @param position -> column piece is to be placed in
+ * @return true if move succeeded, false otherwise*/
 bool Logic::halfQuantumMove(int column) {
     int depth = tryPlace(column);
+    //depth > -1 limits the number of quantum moves above the board to 2
+    //grid[2][column] occupied makes sure that if there is a full piece in the top column a player cannot play a quantum move above it
     bool columnNotFull = depth > -1 && grid[2][column] != "RRR" && grid[2][column] != "YYY";
     if (columnNotFull) {
         quantumMoves.push_back(column);
         quantumMovesPlayed++;
+        //if two quantum moves have been played call quantumMove organizer function
         if (quantumMovesPlayed % 2 == 0 && quantumMovesPlayed != 0) {
             quantumMoveToTurns();
             turnsPlayed++;
@@ -253,6 +261,7 @@ void Logic::updateBoard() {
             }
         } else {
             //we need to play two moves because a quantum move consists of two placements on the board
+            //check for valid placement
             bool columnNotFull1 = tryPlace(turn[0]) > -1;
             bool columnNotFull2 = tryPlace(turn[0] > -1);
             bool notFull = columnNotFull1 && columnNotFull2;
@@ -268,6 +277,7 @@ void Logic::updateBoard() {
         }
     }
 
+    //handles a quantum turn that is half completed
     for (int quantumMove: quantumMoves) {
         bool notOutOfBounds = tryPlace(quantumMove) != -1;
         if (notOutOfBounds) {
@@ -289,9 +299,8 @@ void Logic::measure() {
     for (std::vector<int> &turn: turns) {
         //have to specify pass by value or the changes won't hold
         if (turn.size() != 1) {
-            std::random_device r;
-
             // Choose a random mean between 1 and 6
+            std::random_device r;
             std::default_random_engine e1(r());
             std::uniform_int_distribution<int> uniform_dist(1, 6);
             int choice = uniform_dist(e1) % 2;
@@ -308,16 +317,7 @@ void Logic::measure() {
     updateBoard();
 }
 
-void Logic::printMoves() {
-    for (int i = 0; i < turns.size(); i++) {
-        for (int move: turns[i]) {
-            std::cout << move << " ";
-        }
-        std::cout << "\n";
-    }
-
-}
-
+/**Prints the board, used in debugging*/
 void Logic::printBoard() {
 
     for (int y = 0; y < grid.size(); y++) {
