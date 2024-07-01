@@ -20,10 +20,7 @@ public:
     void drawPieces();
     void drawClassicTurnInProgress();
     void drawQuantumTurnInProgress();
-    void drawHalfQuantumMove();
-    sf::Keyboard::Key handleKeyPress(sf::Event event);
-    void handleQuantumMove(sf::Event event);
-    Logic getLogic();
+    void handleKeyPress(sf::Event event);
     void play();
 };
 

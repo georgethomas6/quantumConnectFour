@@ -3,6 +3,7 @@
 Logic::Logic(int columns, int rows) {
     this->columns = columns;
     this->rows = rows;
+    turnsPlayed = 0;
     yellowPosition = columns / 2;
     redPosition = columns / 2;
     redTurn = true;
@@ -50,6 +51,14 @@ bool Logic::getRedTurn() {
     return redTurn;
 }
 
+int Logic::getQuantumMovesPlayed() {
+    return quantumMovesPlayed;
+}
+
+int Logic::getTurnsPlayed() {
+    return turnsPlayed;
+}
+
 /**Switches the value of the redTurn boolean*/
 void Logic::changeTurn() {
     redTurn = !redTurn;
@@ -66,7 +75,7 @@ bool Logic::getCMoveInProgress() {
 }
 
 /**@return Red if red won the game, Yel if yellow won the game, stalemate if neither won, and XXX if game is still in progress*/
-std::string Logic::winner() {
+bool Logic::winner() {
     int cnt = 0;
     for (std::vector<std::string> row: grid) {
         for (std::string entry: row) {
@@ -76,26 +85,19 @@ std::string Logic::winner() {
         }
     }
 
-    if (cnt == 0) {
-        return "stalemate";
-    } else if (redTurn && (checkCols() || checkRows() || checkDiagonals())) {
-        return "Red";
-    } else if (!redTurn && (checkCols() || checkRows() || checkDiagonals())) {
-        return "Yel";
-    }
-
-    return "XXX";
+    return cnt == 0 || checkCols() || checkRows() || checkDiagonals();
 }
 
 /**@return true if there is a group in one of the rows, false otherwise*/
 bool Logic::checkRows() {
-    for (std::vector<std::string> row: grid) {
+    for (std::vector<std::string> &row: grid) {
         //check every four positions in the row for four of a kind
         for (int i = 0; i < row.size() - 3; i++) {
             bool fourInARow =
-                    row[i] == row[i + 1] && row[i + 1] == row[i + 2] && row[i + 2] == row[i + 3] &&
-                    (row[i] == "RRR" || row[i] ==
-                                        "YYY");
+                    row[i] == row[i + 1]
+                    && row[i] == row[i + 2]
+                    && row[i] == row[i + 3]
+                    && (row[i] == "RRR" || row[i] == "YYY");
             if (fourInARow) {
                 return true;
             }
@@ -106,42 +108,60 @@ bool Logic::checkRows() {
 
 /**@return true if there is a group in one of the columns, false otherwise*/
 bool Logic::checkCols() {
-    for (int x = 0; x < columns; x++) {
-        for (int y = 0; y < rows - 3; y++) {
-            bool fourInARow = grid[y][x] == grid[y + 1][x] && grid[y + 1][x] == grid[y + 2][x] &&
-                              grid[y + 2][x] == grid[y + 3][x] && (grid[y][x] == "RRR" || grid[y][x] == "YYY");
+    for (int y = 0; y < grid.size() - 3; y++) {
+        for (int x = 0; x < grid[y].size(); x++) {
+            bool fourInARow =
+                    grid[y][x] == grid[y + 1][x]
+                    && grid[y][x] == grid[y + 1][x]
+                    && grid[y][x] == grid[y + 2][x]
+                    && grid[y][x] == grid[y + 3][x]
+                    && (grid[y][x] == "RRR" || grid[y][x] == "YYY");
             if (fourInARow) {
                 return true;
             }
         }
     }
+
     return false;
 }
 
 /**@return true if there is a group in one of the diagonals, false otherwise*/
 bool Logic::checkDiagonals() {
+
     //check ascending diagonals
-    for (int x = 0; x < columns - 3; x++) {
-        for (int y = 0; y < rows - 3; y++) {
-            bool fourInARow = grid[y][x] == grid[y + 1][x + 1] && grid[y + 1][x + 1] == grid[y + 2][x + 2] &&
-                              grid[y + 2][x + 2] == grid[y + 3][x + 3] && (grid[y][x] == "RRR" || grid[y][x] == "YYY");
+    for (int y = grid.size() - 1; y > 4; y--) {
+        for (int x = 0; x < grid[y].size(); x++) {
+            bool fourInARow =
+                    grid[y][x] == grid[y - 1][x + 1] &&
+                    grid[y][x] == grid[y - 2][x + 2] &&
+                    grid[y][x] == grid[y - 3][x + 3] && (
+                            grid[y][x] == "YYY" || grid[y][x] == "RRR");
             if (fourInARow) {
+                return true;
+            }
+        }
+   }
+
+    //check descending diagonals
+    for (int y = grid.size() - 1; y > 3; y--){
+        for (int x = grid[y].size() - 1; x > 2; x--){
+            bool fourInARow =
+                    grid[y][x] == grid[y - 1][x - 1] &&
+                    grid[y][x] == grid[y - 2][x - 2] &&
+                    grid[y][x] == grid[y - 3][x - 3] && (
+                    grid[y][x] == "RRR" || grid[y][x] == "YYY");
+            if (fourInARow){
                 return true;
             }
         }
     }
 
-    //check descending diagonals
-    for (int y = 0; y < rows - 3; y++) {
-        for (int x = columns - 1; x >= 3; x--) {
-            bool fourInARowD = grid[y][x] == grid[y + 1][x - 1] && grid[y + 1][x - 1] == grid[y + 2][x - 2] &&
-                               grid[y + 2][x - 2] == grid[y + 3][x - 3] && (grid[y][x] == "RRR" || grid[y][x] == "YYY");
-            if (fourInARowD) {
-                return true;
-            }
-        }
-    }
     return false;
+}
+
+void Logic::resetPositions() {
+    redPosition = columns / 2;
+    yellowPosition = columns / 2;
 }
 
 /**Attempts to place the input string in the input col on the grid
@@ -170,28 +190,34 @@ void Logic::changeCMoveInProgress() {
 
 /**Makes a classical move in the column corresponding to the parameter
  * @param position -> column piece is to be placed in*/
-void Logic::classicalMove(int column) {
+bool Logic::classicalMove(int column) {
     int depth = tryPlace(column);
     bool columnNotFull = depth > 1;
     if (columnNotFull) {
         std::vector<int> move;
         move.push_back(column);
         turns.push_back(move);
+        turnsPlayed++;
+        return true;
     }
+    return false;
 }
 
 /**Makes half of a quantum move in the column corresponding to the parameter
  * @param position -> column piece is to be placed in*/
-void Logic::halfQuantumMove(int column) {
+bool Logic::halfQuantumMove(int column) {
     int depth = tryPlace(column);
-    bool columnNotFull = depth > -1;
+    bool columnNotFull = depth > -1 && grid[2][column] != "RRR" && grid[2][column] != "YYY";
     if (columnNotFull) {
         quantumMoves.push_back(column);
         quantumMovesPlayed++;
         if (quantumMovesPlayed % 2 == 0 && quantumMovesPlayed != 0) {
             quantumMoveToTurns();
+            turnsPlayed++;
         }
+        return true;
     }
+    return false;
 }
 
 /**Takes the vector of quantum moves made and pairs each quantum move together to be added to Turn queue,
@@ -282,15 +308,16 @@ void Logic::measure() {
     updateBoard();
 }
 
-void Logic::printMoves(){
-    for (int i = 0; i < turns.size(); i++){
-        for (int move : turns[i]){
+void Logic::printMoves() {
+    for (int i = 0; i < turns.size(); i++) {
+        for (int move: turns[i]) {
             std::cout << move << " ";
         }
         std::cout << "\n";
     }
 
 }
+
 void Logic::printBoard() {
 
     for (int y = 0; y < grid.size(); y++) {

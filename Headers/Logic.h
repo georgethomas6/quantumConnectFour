@@ -7,6 +7,7 @@
 
 class Logic {
 private:
+    int turnsPlayed;
     int rows;
     int columns;
     int redPosition;
@@ -22,20 +23,23 @@ public:
     Logic(int columns, int rows);
     int getRedPosition();
     int getYellowPosition();
+    int getQuantumMovesPlayed();
+    int getTurnsPlayed();
     bool getCMoveInProgress();
     bool getRedTurn();
     bool checkCols();
     bool checkRows();
     bool checkDiagonals();
-    std::string winner();
+    bool winner();
     std::vector<std::vector<std::string>> getGrid();
     int tryPlace(int column);
     void changeTurn();
+    void resetPositions();
     void moveRed(int dx);
     void moveYellow(int dx);
     void changeCMoveInProgress();
-    void classicalMove(int column);
-    void halfQuantumMove(int column);
+    bool classicalMove(int column);
+    bool halfQuantumMove(int column);
     void quantumMoveToTurns();
     void updateBoard();
     void measure();

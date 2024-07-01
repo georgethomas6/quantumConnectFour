@@ -16,7 +16,7 @@ cFourGraphics::cFourGraphics(int xCells, int yCells, int xSpace, int ySpace)
     this->xSpace = xSpace;
     this->ySpace = ySpace;
 
-    verticalSpace = ySpace / this->yCells;
+    verticalSpace = ySpace / (this->yCells + 2);
     horizontalSpace = xSpace / this->xCells;
     if (verticalSpace > horizontalSpace) {
         radius = horizontalSpace / 3;
@@ -34,12 +34,13 @@ void cFourGraphics::drawGrid() {
         sf::RectangleShape verticalLine(sf::Vector2f(5, verticalSpace * (yCells - 3)));
         verticalLine.setFillColor(sf::Color::Black);
 
-        //verticalSpace * 2 puts the columns at a position two cells down from the top and one from the bottom
-        verticalLine.setPosition(horizontalSpace * x, verticalSpace * 2);
+        //verticalSpace * 4 puts the columns at a position four cells down from the top and one from the bottom, this number needs to match the vertical transformation below
+        verticalLine.setPosition(horizontalSpace * x, verticalSpace * 4);
         window.draw(verticalLine);
     }
     //draw rows
-    for (int y = 2; y < yCells; y++) {
+    //the number four is a vertical transformation
+    for (int y = 4; y < yCells + 4; y++) {
         //horizontalSpace * (xCells - 2) + 5 puts the length of the rows enough to finish the grid, 5 is the line thickness
         sf::RectangleShape horizontalLine(sf::Vector2f(horizontalSpace * (xCells - 2) + 5, 5));
         horizontalLine.setFillColor(sf::Color::Black);
@@ -92,31 +93,6 @@ void cFourGraphics::drawQuantumTurnInProgress() {
     }
 }
 
-//IMPLEMENT DRAW HALF QUANTUM TURN THAT DOES NOT AFFECT LOGIC JUST PICTURE, THEN WHEN YOU GET BOTH COORDINATES JUST MAKE QUANTUM TURN AND UPDATE BOARD WHICH WILL FINISH DRAWING THE QUANTUM TURN
-void cFourGraphics::drawHalfQuantumMove() {
-    sf::CircleShape circle(radius);
-    sf::RectangleShape cover;
-    cover.setSize(sf::Vector2f(1.2 * radius, 2 * radius));
-    cover.setFillColor(sf::Color(211, 211, 211));
-    int position;
-    if (logic.getRedTurn()){
-        position = logic.getRedPosition();
-        int depth = logic.tryPlace(position);
-        std::cout << position << " " << depth << " \n";
-        if (depth != -1){
-            circle.setFillColor(sf::Color::Red);
-            circle.setPosition(horizontalSpace * (position + 1) + (horizontalSpace - radius) / 3,
-                               verticalSpace * (depth + 2) + (verticalSpace - radius) / 3);
-            cover.setPosition(horizontalSpace * (position + 1) + 2 * (horizontalSpace - radius) / 3,
-                              verticalSpace * (depth + 2) + (verticalSpace - radius) / 3);
-            window.draw(circle);
-            window.draw(cover);
-        }
-    }
-    //window.display();
-}
-
-
 /**Draws the pieces placed in the grid
  * @param grid -> a vector containing a vector of strings that serves as the logical grid
  **/
@@ -160,9 +136,7 @@ void cFourGraphics::drawPieces() {
 }
 
 
-
-sf::Keyboard::Key cFourGraphics::handleKeyPress(sf::Event event) {
-    int *p1;
+void cFourGraphics::handleKeyPress(sf::Event event) {
     if (event.type == sf::Event::EventType::KeyPressed) {
         if (logic.getRedTurn()) {
             if (event.key.code == sf::Keyboard::Key::Right) {
@@ -170,18 +144,26 @@ sf::Keyboard::Key cFourGraphics::handleKeyPress(sf::Event event) {
             } else if (event.key.code == sf::Keyboard::Key::Left) {
                 logic.moveRed(-1);
             } else if (event.key.code == sf::Keyboard::Key::Space && logic.getCMoveInProgress()) {
-                logic.classicalMove(logic.getRedPosition());
-            } else if (event.key.code == sf::Keyboard::Key::Q) {
+                if (logic.classicalMove(logic.getRedPosition())) {
+                    logic.updateBoard();
+                    logic.printBoard();
+                    std::cout << "\n";
+                    logic.changeTurn();
+                    logic.resetPositions();
+                }
+            } else if (event.key.code == sf::Keyboard::Key::Q && logic.getQuantumMovesPlayed() % 2 == 0) {
                 logic.changeCMoveInProgress();
-            } else if (event.key.code == sf::Keyboard::Key::Num1 && !logic.getCMoveInProgress()){
-                int place1 = logic.getRedPosition();
-                p1 = &place1;
-                return sf::Keyboard::Key::Num1;
-            } else if (event.key.code == sf::Keyboard::Key::Num2 && !logic.getCMoveInProgress() && p1 != nullptr){
-                int place2 = logic.getRedPosition();
-                int place1 = *p1;
-                //BUG HERE
-               // logic.quantumMove(place1, place2);
+            } else if (event.key.code == sf::Keyboard::Key::Space && !logic.getCMoveInProgress()) {
+                if (logic.halfQuantumMove(logic.getRedPosition())) {
+                    logic.updateBoard();
+                    logic.printBoard();
+                    std::cout << "\n";
+                    logic.resetPositions();
+                    if (logic.getQuantumMovesPlayed() % 2 == 0) {
+                        logic.changeTurn();
+                        logic.changeCMoveInProgress();
+                    }
+                }
             }
         } else {
             if (event.key.code == sf::Keyboard::Key::Right) {
@@ -189,14 +171,29 @@ sf::Keyboard::Key cFourGraphics::handleKeyPress(sf::Event event) {
             } else if (event.key.code == sf::Keyboard::Key::Left) {
                 logic.moveYellow(-1);
             } else if (event.key.code == sf::Keyboard::Key::Space && logic.getCMoveInProgress()) {
-                logic.classicalMove(logic.getYellowPosition());
-            } else if (event.key.code == sf::Keyboard::Key::S) {
+                if (logic.classicalMove(logic.getYellowPosition())) {
+                    logic.updateBoard();
+                    logic.printBoard();
+                    std::cout << "\n";
+                    logic.changeTurn();
+                    logic.resetPositions();
+                }
+            } else if (event.key.code == sf::Keyboard::Key::Q && logic.getQuantumMovesPlayed() % 2 == 0) {
                 logic.changeCMoveInProgress();
+            } else if (event.key.code == sf::Keyboard::Key::Space && !logic.getCMoveInProgress()) {
+                if (logic.halfQuantumMove(logic.getYellowPosition())) {
+                    logic.updateBoard();
+                    logic.printBoard();
+                    std::cout << "\n";
+                    logic.resetPositions();
+                    if (logic.getQuantumMovesPlayed() % 2 == 0) {
+                        logic.changeTurn();
+                        logic.changeCMoveInProgress();
+                    }
+                }
             }
         }
     }
-    //arbitrary for now
-    return sf::Keyboard::Key::P;
 }
 
 void cFourGraphics::play() {
@@ -209,29 +206,26 @@ void cFourGraphics::play() {
 
         while (window.pollEvent(event)) {
 
+
             if (event.key.code == sf::Keyboard::Key::Escape) {
                 window.close();
             }
 
 
-            sf::Keyboard::Key pressed = handleKeyPress(event);
-
-            if (logic.getCMoveInProgress()) {
-                drawGrid();
-                drawPieces();
-                drawClassicTurnInProgress();
-            } else {
-
-                drawGrid();
-                if (pressed == sf::Keyboard::Key::Num1){
-                    drawHalfQuantumMove();
-                }
-                drawPieces();
-                drawQuantumTurnInProgress();
-
-
+            if (logic.getTurnsPlayed() % 5 == 0) {
+                logic.measure();
             }
+            drawGrid();
+            drawPieces();
 
+            if (!logic.winner()) {
+                handleKeyPress(event);
+                if (logic.getCMoveInProgress()) {
+                    drawClassicTurnInProgress();
+                } else {
+                    drawQuantumTurnInProgress();
+                }
+            }
             window.display();
 
 
