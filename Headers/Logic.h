@@ -4,6 +4,7 @@
 #include <iostream>
 #include <random>
 #include <functional>
+#include <list>
 
 class Logic {
 
@@ -70,6 +71,8 @@ public:
     void printBoard();
 
     void printMoves();
+
+    bool checkForProppedPiece(std::list<int> columns);
 };
 
 

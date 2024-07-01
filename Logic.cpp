@@ -94,14 +94,20 @@ bool Logic::winner() {
 /**@return true if there is a group in one of the rows, false otherwise*/
 bool Logic::checkRows() {
     for (std::vector<std::string> &row: grid) {
+
         //check every four positions in the row for four of a kind
         for (int i = 0; i < row.size() - 3; i++) {
+            std::list<int> cols;
+            cols.push_back(i);
+            cols.push_back(i + 1);
+            cols.push_back(i + 2);
+            cols.push_back(i + 3);
             bool fourInARow =
                     row[i] == row[i + 1]
                     && row[i] == row[i + 2]
                     && row[i] == row[i + 3]
                     && (row[i] == "RRR" || row[i] == "YYY");
-            if (fourInARow) {
+            if (fourInARow && !checkForProppedPiece(cols)) {
                 return true;
             }
         }
@@ -127,18 +133,36 @@ bool Logic::checkCols() {
     return false;
 }
 
+/**@return true if the piece directly under at least one member of the group is quantum, false otherwise*/
+bool Logic::checkForProppedPiece(std::list<int> columns){
+    for (int column : columns){
+        int height = tryPlace(column) - 1;
+        for (int y = height; y < grid.size(); y++){
+            if (grid[y][column] == "RXX" || grid[y][column] == "YXX"){
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
 /**@return true if there is a group in one of the diagonals, false otherwise*/
 bool Logic::checkDiagonals() {
 
     //check ascending diagonals
     for (int y = grid.size() - 1; y > 4; y--) {
         for (int x = 0; x < grid[y].size(); x++) {
+            std::list<int> cols;
+            cols.push_back(x);
+            cols.push_back(x + 1);
+            cols.push_back(x + 2);
+            cols.push_back(x + 3);
             bool fourInARow =
                     grid[y][x] == grid[y - 1][x + 1] &&
                     grid[y][x] == grid[y - 2][x + 2] &&
                     grid[y][x] == grid[y - 3][x + 3] && (
                             grid[y][x] == "YYY" || grid[y][x] == "RRR");
-            if (fourInARow) {
+            if (fourInARow && !checkForProppedPiece(cols)) {
                 return true;
             }
         }
@@ -147,12 +171,18 @@ bool Logic::checkDiagonals() {
     //check descending diagonals
     for (int y = grid.size() - 1; y > 3; y--) {
         for (int x = grid[y].size() - 1; x > 2; x--) {
+            std::list<int> cols;
+            cols.push_back(x);
+            cols.push_back(x - 1);
+            cols.push_back(x - 2);
+            cols.push_back(x - 3);
             bool fourInARow =
                     grid[y][x] == grid[y - 1][x - 1] &&
                     grid[y][x] == grid[y - 2][x - 2] &&
                     grid[y][x] == grid[y - 3][x - 3] && (
                             grid[y][x] == "RRR" || grid[y][x] == "YYY");
-            if (fourInARow) {
+
+            if (fourInARow && !checkForProppedPiece(cols)) {
                 return true;
             }
         }
